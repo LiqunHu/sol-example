@@ -1,4 +1,4 @@
-use processor::process_instruction;
+pub use processor::process_instruction;
 use solana_program::entrypoint;
 
 pub mod error;

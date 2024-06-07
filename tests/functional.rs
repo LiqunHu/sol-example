@@ -1,4 +1,4 @@
-#![cfg(feature = "test-bpf")]
+// #![cfg(feature = "test-bpf")]
 use {
     borsh::{to_vec, BorshDeserialize},
     secp256k1::{rand::rngs::OsRng, Message, Secp256k1},
@@ -35,7 +35,7 @@ async fn test() {
         schema: "c7eab8b7d7e44b05b41b613fe548edf5".to_string(),
         nullifier: "0xa3a5c8c3dd7dfe4abc91433fb9ad3de08344578713070983c905123b7ea91dda".to_string(),
         recipient: "A9Jk4bAebu5FNY3EvFF6Q6f86Sg38PE5fmVJbRugDpdf".to_string(),
-        public_fields_hash: "89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6".to_string(),
+        public_fields_hash: "0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6".to_string(),
         a_recovery_id: *a_recovery_id,
         a_signature: a_signature.try_into().unwrap(),
         n_recovery_id: *n_recovery_id,

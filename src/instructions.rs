@@ -93,7 +93,6 @@ pub fn attest(
         )?;
         e_data.serialize(&mut &mut data_account.data.borrow_mut()[..])?;
     } else {
-        let mut e_data = unpack_pda_data(&data_account.data.borrow())?;
         realloc_account(to_vec(&e_data)?.len(), data_account, payer, system_program)?;
         e_data.serialize(&mut &mut data_account.data.borrow_mut()[..])?;
     }
