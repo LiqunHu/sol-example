@@ -8,89 +8,45 @@ use {
         account::Account, keccak, secp256k1_recover::secp256k1_recover, signature::Signer,
         signer::keypair::Keypair, system_program, transaction::Transaction,
     },
-    zkpass_airdrop_attestation::state::{Attest, AttestationRequest, ExampleDataV1, Task},
+    example::state::{Attest, AttestationRequest, ExampleDataV1, Task},
 };
 
 #[tokio::test]
 async fn test() {
     let program_id = Pubkey::new_unique();
-    let notary_account = Keypair::new();
-
-    let secp = Secp256k1::new();
-    let (allocator_secret_key, allocator_public_key) = secp.generate_keypair(&mut OsRng);
-    let (notary_secret_key, notary_public_key) = secp.generate_keypair(&mut OsRng);
 
     let (data_account_key, _) = Pubkey::find_program_address(&["example".as_bytes()], &program_id);
 
     let mut program_test = ProgramTest::new("example", program_id, processor!(process_instruction));
-    program_test.add_account(
-        notary_account.pubkey(),
-        Account {
-            lamports: 50000000,
-            ..Account::default()
-        },
-    );
-
     let (mut banks_client, payer, recent_blockhash) = program_test.start().await;
 
-    let notary =
-        hex::encode(keccak::hashv(&[&notary_public_key.serialize_uncompressed()[1..]]).as_ref());
-    let allocator =
-        hex::encode(keccak::hashv(&[&allocator_public_key.serialize_uncompressed()[1..]]).as_ref());
+    let task = Task {
+        task: "859b2b19b1da468ba15090960066e65d".to_string(),
+        schema: "c7eab8b7d7e44b05b41b613fe548edf5".to_string(),
+        notary: "e504ad91fbaad88362941a65b1c4c1e1cdd5cf69e27a3a08c8f51145c2e12c6a".to_string(),
+    };
+
+    let mut a_signature = 
+        hex::decode("e7f484adcaf1c8f53227901eaeed1f82cc49cfec5c36aefd31f9c6018ff56154359274fa0e33d0de3f9b9921e3c6c33f17c82e4431be572f0bfcd4cd65a31af101".to_string()).unwrap();
+    let a_recovery_id = &a_signature[a_signature.len()-1].clone();
+    a_signature.pop();
+
+    let mut n_signature = 
+        hex::decode("7c8ba261642fb3d4f4cb198071346ffcaeb8b7587f81a055fb0796e84c1cf0b5726fd1b7a88c2a7d13b8c75bca49e15b1ed51f80cee7bbf600c102e5ab20384600".to_string()).unwrap();
+        let n_recovery_id = &n_signature[n_signature.len()-1].clone();
+        n_signature.pop();
 
     let mut attest = AttestationRequest {
-        task: "0x3837396435313738613434363464666438373035636465636339326662623030".to_string(),
-        schema: "e504ad91fbaad88362941a65b1c4c1e1cdd5cf69e27a3a08c8f51145c2e12c6a".to_string(),
-        nullifier: "0xf1dc22f28f20a336838d91aea3da6749ccc0cd3ef5e985c2dd0788b310734dab".to_string(),
-        recipient: "CbtxDcg4jPUCCuf5smF9kUUS1MTXchcJA2ggK1x4pa5A".to_string(),
+        task: task.task.clone(),
+        schema: task.schema.clone(),
+        nullifier: "0xa3a5c8c3dd7dfe4abc91433fb9ad3de08344578713070983c905123b7ea91dda".to_string(),
+        recipient: "A9Jk4bAebu5FNY3EvFF6Q6f86Sg38PE5fmVJbRugDpdf".to_string(),
         public_fields_hash: "9dNsQaHyWg9c4jURSdvP9RxfEtBVN7Xh4sypL3kMH81B".to_string(),
-        a_recovery_id: 0,
-        a_signature: [0; 64],
+        a_recovery_id: a_recovery_id,
+        a_signature: a_signature,
         n_recovery_id: 0,
-        n_signature: [0; 64],
-        notary: notary.clone(),
-        allocator: allocator.clone(),
+        n_signature: n_signature
     };
-
-    let task = Task {
-        task: attest.task.clone(),
-        schema: attest.schema.clone(),
-        notary: notary.clone(),
-    };
-    let msg_hash = keccak::hashv(&[&to_vec(&task).unwrap()]);
-    let message = Message::from_digest_slice(&msg_hash.as_ref()).unwrap();
-    let signature = secp.sign_ecdsa_recoverable(&message, &allocator_secret_key);
-    let (recovery_id, serialize_sig) = signature.serialize_compact();
-
-    let res = secp256k1_recover(
-        msg_hash.as_ref(),
-        recovery_id.to_i32() as u8,
-        serialize_sig.as_ref(),
-    )
-    .unwrap();
-    println!(
-        "!!!{:?}",
-        hex::encode(keccak::hashv(&[res.0.as_ref()]).as_ref())
-    );
-
-    attest.a_recovery_id = recovery_id.to_i32() as u8;
-
-    attest.a_signature = serialize_sig;
-
-    let at = Attest {
-        task: attest.task.clone(),
-        schema: attest.schema.clone(),
-        nullifier: attest.nullifier.clone(),
-        recipient: attest.recipient.clone(),
-        public_fields_hash: attest.public_fields_hash.clone(),
-    };
-    let msg_hash = keccak::hashv(&[&to_vec(&at).unwrap()]);
-    let message = Message::from_digest_slice(&msg_hash.as_ref()).unwrap();
-    let signature = secp.sign_ecdsa_recoverable(&message, &notary_secret_key);
-    let (recovery_id, serialize_sig) = signature.serialize_compact();
-    attest.n_recovery_id = recovery_id.to_i32() as u8;
-
-    attest.n_signature = serialize_sig;
 
     let transaction = Transaction::new_signed_with_payer(
         &[Instruction::new_with_borsh(

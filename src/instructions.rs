@@ -45,7 +45,9 @@ pub fn attest(
     )
     .unwrap();
 
-    if hex::encode(keccak::hashv(&[res.0.as_ref()]).as_ref()) != req.allocator {
+    if hex::encode(keccak::hashv(&[res.0.as_ref()]).as_ref())
+        != "69e7d686e612ab57e3619f4a19a567b3b212a5b35ba0e3b600fbed5c2ee9083d".to_string()
+    {
         return Err(ExampleError::VerificationFailed.into());
     }
 

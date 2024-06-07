@@ -30,7 +30,6 @@ pub struct AttestationRequest {
     pub n_recovery_id: u8,
     pub n_signature: [u8; 64],
     pub notary: String,
-    pub allocator: String,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone)]
