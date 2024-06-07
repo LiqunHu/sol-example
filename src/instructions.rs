@@ -6,7 +6,6 @@ use solana_program::{
     pubkey::Pubkey,
     secp256k1_recover,
 };
-use std::str::FromStr;
 
 use crate::{
     error::ExampleError,
