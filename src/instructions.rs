@@ -11,7 +11,7 @@ use std::str::FromStr;
 use crate::{
     error::ExampleError,
     state::{Attest, Attestation, AttestationRequest, ExampleDataV1, Task, EXAMPLE_PREFIX},
-    utils::{create_pda_account, realloc_account, unpack_pda_data},
+    utils::{create_pda_account, realloc_account},
 };
 
 pub fn attest(

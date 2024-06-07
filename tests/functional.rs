@@ -1,12 +1,10 @@
 // #![cfg(feature = "test-bpf")]
 use {
-    borsh::{to_vec, BorshDeserialize},
-    secp256k1::{rand::rngs::OsRng, Message, Secp256k1},
+    borsh::{BorshDeserialize},
     solana_program::instruction::{AccountMeta, Instruction},
     solana_program_test::*,
     solana_sdk::{
-        account::Account, keccak, secp256k1_recover::secp256k1_recover, signature::Signer,
-        signer::keypair::Keypair, system_program, transaction::Transaction,pubkey::Pubkey
+        signature::Signer, system_program, transaction::Transaction,pubkey::Pubkey
     },
     example::{process_instruction, processor::ExampleInstruction, state::{AttestationRequest, ExampleDataV1}},
 };
@@ -17,7 +15,7 @@ async fn test() {
 
     let (data_account_key, _) = Pubkey::find_program_address(&["example".as_bytes()], &program_id);
 
-    let mut program_test = ProgramTest::new("example", program_id, processor!(process_instruction));
+    let program_test = ProgramTest::new("example", program_id, processor!(process_instruction));
     let (mut banks_client, payer, recent_blockhash) = program_test.start().await;
 
     let mut a_signature = 
@@ -30,7 +28,7 @@ async fn test() {
     let n_recovery_id = &n_signature[n_signature.len()-1].clone();
     n_signature.pop();
 
-    let mut attest = AttestationRequest {
+    let attest = AttestationRequest {
         task: "859b2b19b1da468ba15090960066e65d".to_string(),
         schema: "c7eab8b7d7e44b05b41b613fe548edf5".to_string(),
         nullifier: "0xa3a5c8c3dd7dfe4abc91433fb9ad3de08344578713070983c905123b7ea91dda".to_string(),
