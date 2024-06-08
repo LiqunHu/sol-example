@@ -20,13 +20,11 @@ async fn test() {
 
     let mut a_signature = 
         hex::decode("e7f484adcaf1c8f53227901eaeed1f82cc49cfec5c36aefd31f9c6018ff56154359274fa0e33d0de3f9b9921e3c6c33f17c82e4431be572f0bfcd4cd65a31af101".to_string()).unwrap();
-    let a_recovery_id = &a_signature[a_signature.len()-1].clone();
-    a_signature.pop();
+    let a_recovery_id = a_signature.pop().unwrap();
 
     let mut n_signature = 
         hex::decode("7c8ba261642fb3d4f4cb198071346ffcaeb8b7587f81a055fb0796e84c1cf0b5726fd1b7a88c2a7d13b8c75bca49e15b1ed51f80cee7bbf600c102e5ab20384600".to_string()).unwrap();
-    let n_recovery_id = &n_signature[n_signature.len()-1].clone();
-    n_signature.pop();
+     let n_recovery_id =  n_signature.pop().unwrap();
 
     let attest = AttestationRequest {
         task: "859b2b19b1da468ba15090960066e65d".to_string(),
@@ -34,9 +32,9 @@ async fn test() {
         nullifier: "0xa3a5c8c3dd7dfe4abc91433fb9ad3de08344578713070983c905123b7ea91dda".to_string(),
         recipient: "A9Jk4bAebu5FNY3EvFF6Q6f86Sg38PE5fmVJbRugDpdf".to_string(),
         public_fields_hash: "0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6".to_string(),
-        a_recovery_id: *a_recovery_id,
+        a_recovery_id: a_recovery_id,
         a_signature: a_signature.try_into().unwrap(),
-        n_recovery_id: *n_recovery_id,
+        n_recovery_id: n_recovery_id,
         n_signature: n_signature.try_into().unwrap(),
         notary: "e504ad91fbaad88362941a65b1c4c1e1cdd5cf69e27a3a08c8f51145c2e12c6a".to_string()
     };
